@@ -1,0 +1,94 @@
+Index: client_libs/libplayerc/dev_ptz.c
+===================================================================
+--- client_libs/libplayerc/dev_ptz.c	(revision 9142)
++++ client_libs/libplayerc/dev_ptz.c	(working copy)
+@@ -113,6 +113,7 @@
+   // set speed = 0 by default
+   cmd.panspeed  = 0;
+   cmd.tiltspeed = 0;
++  cmd.zoomspeed = 0;
+ 
+   return playerc_client_write(device->info.client, &device->info,
+                               PLAYER_PTZ_CMD_STATE, &cmd, NULL);
+@@ -138,7 +139,7 @@
+ 
+ // Set the pan, tilt and zoom values with speed as well.
+ int playerc_ptz_set_ws(playerc_ptz_t *device, double pan, double tilt,
+-                       double zoom, double panspeed, double tiltspeed)
++                       double zoom, double panspeed, double tiltspeed, double zoomspeed)
+ {
+   player_ptz_cmd_t cmd;
+ 
+@@ -147,6 +148,7 @@
+   cmd.zoom = zoom;
+   cmd.panspeed  = panspeed;
+   cmd.tiltspeed = tiltspeed;
++  cmd.zoomspeed = zoomspeed;
+ 
+   return playerc_client_write(device->info.client, &device->info,
+                               PLAYER_PTZ_CMD_STATE, &cmd, NULL);
+Index: client_libs/libplayerc/playerc.h
+===================================================================
+--- client_libs/libplayerc/playerc.h	(revision 9142)
++++ client_libs/libplayerc/playerc.h	(working copy)
+@@ -3193,10 +3193,11 @@
+ @param zoom Zoom value, in radians (corresponds to camera field of view).
+ @param panspeed Pan speed, in radians/sec.
+ @param tiltspeed Tilt speed, in radians/sec.
++@param zoomspeed Zoom speed, in radians/sec.
+ 
+ */
+ PLAYERC_EXPORT int playerc_ptz_set_ws(playerc_ptz_t *device, double pan, double tilt, double zoom,
+-                       double panspeed, double tiltspeed);
++                       double panspeed, double tiltspeed, double zoomspeed);
+ 
+ /** @brief Change control mode (select velocity or position control)
+ 
+Index: client_libs/libplayerc++/ptzproxy.cc
+===================================================================
+--- client_libs/libplayerc++/ptzproxy.cc	(revision 9142)
++++ client_libs/libplayerc++/ptzproxy.cc	(working copy)
+@@ -111,7 +111,7 @@
+ void PtzProxy::SetSpeed(double aPanSpeed, double aTiltSpeed, double aZoomSpeed)
+ {
+   scoped_lock_t  lock(mPc->mMutex);
+-  playerc_ptz_set_ws(mDevice, 0, 0, 0, aPanSpeed, aTiltSpeed);
++  playerc_ptz_set_ws(mDevice, 0, 0, 0, aPanSpeed, aTiltSpeed, aZoomSpeed);
+ }
+ 
+ int
+Index: libplayerinterface/interfaces/008_ptz.def
+===================================================================
+--- libplayerinterface/interfaces/008_ptz.def	(revision 9142)
++++ libplayerinterface/interfaces/008_ptz.def	(working copy)
+@@ -45,6 +45,8 @@
+   float panspeed;
+   /** Current tilt velocity [rad/s] */
+   float tiltspeed;
++  /** Current zoom velocity */
++  float zoomspeed;
+   /** Current pan / tilt status */
+   uint32_t status;
+ } player_ptz_data_t;
+@@ -65,6 +67,8 @@
+   float panspeed;
+   /** Desired tilt velocity [rad/s] */
+   float tiltspeed;
++  /** Desired zoom velocity */
++  float zoomspeed;
+ } player_ptz_cmd_t;
+ 
+ /** @brief Request/reply: Query pan/tilt status.
+Index: utils/playerv/pv_dev_ptz.c
+===================================================================
+--- utils/playerv/pv_dev_ptz.c	(revision 9142)
++++ utils/playerv/pv_dev_ptz.c	(working copy)
+@@ -215,7 +215,7 @@
+   zoom = 2 * atan2(0.5, sqrt(ox * ox + oy * oy));
+   speed = sqrt(oy*oy + ox*ox);
+ 
+-  if (playerc_ptz_set_ws(ptz->proxy, pan, tilt, zoom,speed,0) != 0)
++  if (playerc_ptz_set_ws(ptz->proxy, pan, tilt, zoom, speed, 0, 0) != 0)
+     PRINT_ERR1("libplayerc error: %s", playerc_error_str());
+ }
+ 

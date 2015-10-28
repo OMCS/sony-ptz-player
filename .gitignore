@@ -1,0 +1,46 @@
+# Binary directories and files
+bin/
+build/
+*.png
+
+# Directories for reference but not required in repository
+libVISCA2/
+misc/
+
+# Latex files
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.tui
+*.top
+*.tmp
+*.mp
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+
+doc/*.bib
+
+# Mac IDE files
+*.swp
+*~
+
+# Mac finder files and hidden folders
+.DS_Store
